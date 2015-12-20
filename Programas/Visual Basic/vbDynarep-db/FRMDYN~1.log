@@ -1,0 +1,14 @@
+Línea 23: la clase MSDataGridLib.DataGrid del control dgsource no era una clase de control cargada.
+Línea 29: el nombre de la propiedad _ExtentX de dgsource no es válido.
+Línea 30: el nombre de la propiedad _ExtentY de dgsource no es válido.
+Línea 31: el nombre de la propiedad _Version de dgsource no es válido.
+Línea 32: el nombre de la propiedad AllowUpdate de dgsource no es válido.
+Línea 33: el nombre de la propiedad AllowArrows de dgsource no es válido.
+Línea 37: el nombre de la propiedad HeadLines de dgsource no es válido.
+Línea 38: el nombre de la propiedad RowHeight de dgsource no es válido.
+Línea 47: el nombre de la propiedad HeadFont de dgsource no es válido.
+Línea 57: el nombre de la propiedad ColumnCount de dgsource no es válido.
+Línea 70: el nombre de la propiedad Column00 de dgsource no es válido.
+Línea 83: el nombre de la propiedad Column01 de dgsource no es válido.
+Línea 84: el nombre de la propiedad SplitCount de dgsource no es válido.
+Línea 92: el nombre de la propiedad Split0 de dgsource no es válido.

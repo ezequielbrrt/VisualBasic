@@ -1,0 +1,4 @@
+Línea 19: la clase MSWinsockLib.Winsock del control wsock no era una clase de control cargada.
+Línea 22: el nombre de la propiedad _ExtentX de wsock no es válido.
+Línea 23: el nombre de la propiedad _ExtentY de wsock no es válido.
+Línea 24: el nombre de la propiedad _Version de wsock no es válido.

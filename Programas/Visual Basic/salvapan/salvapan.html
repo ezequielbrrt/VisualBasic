@@ -1,0 +1,1009 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<TITLE>Construcción de un Salvapantallas</TITLE>
+</HEAD>
+<BODY>
+
+<B><FONT FACE="Arial" SIZE=4 COLOR="#800040"><P ALIGN="RIGHT">Construcci&oacute;n de un Salvapantallas</P>
+<P ALIGN="RIGHT">para Windows 95/NT con Visual Basic 5.0</P>
+</B></FONT><P ALIGN="JUSTIFY"><HR ALIGN="LEFT" SIZE=1><FONT FACE="Arial">Por Marino Posadas</P>
+</FONT><FONT SIZE=2><P ALIGN="JUSTIFY">&nbsp;</P>
+</FONT><B><FONT FACE="Arial"><P>Introducci&oacute;n</P>
+</B></FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">Recientemente, hemos podido comprobar c&oacute;mo ciertos textos sobre programaci&oacute;n en Visual Basic comentaban la facilidad con la que era posible construir un salvapantallas b&aacute;sico. Si por ello entendemos un programa que realice ALGUNAS de las funciones de un salvapantallas, estamos de acuerdo. Si, por el contrario, nos estamos refiriendo a un programa totalmente funcional, con todas las caracter&iacute;sticas que incorporan los salvapantallas t&iacute;picos de Windows  (<I>Marquee</I>, <I>Mistify</I>, <I>Windows volando</I>, etc.), tal afirmaci&oacute;n es –cuando menos- muy aventurada.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">En la otra cara de la moneda, nos encontramos con los consejos que el <I>Dr. GUI</I> ofrece en <I>Microsoft Development Network</I>, dentro del apartado dedicado a la construcci&oacute;n de salvapantallas y en respuesta a una pregunta sobre el tema, en el sentido de que: "1) Para escribir un Salvapantallas para Windows 95 se necesita el SDK de Win32 y 2) Dr. GUI recomienda usar C++ para esta tarea. Se necesita C++, o, al menos, C para interactuar con Windows...". A lo largo de este art&iacute;culo veremos como eso no es exacto, si bien es cierto que la construcci&oacute;n correcta (o sea, completa) de un salvapantallas, supone bastante m&aacute;s que crear un ejecutable y cambiarle la extensi&oacute;n a SCR. </P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Por otro lado, Visual Basic 5.0 y sus nuevas capacidades gr&aacute;ficas y de acceso a recursos del API de Windows, como las retro-llamadas (<I>callbacks</I>), hacen esto perfectamente posible y, adem&aacute;s, muy ilustrativo desde un punto de vista did&aacute;ctico, lo que nos ha movido a escribir este art&iacute;culo que pretende ilustrar con detenimiento los distintos aspectos de su  funcionamiento y construcci&oacute;n.</P>
+</FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><B><FONT FACE="Arial"><P>Funcionamiento de un Salvapantallas al nivel de sistema</P>
+</B></FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">Desde el punto de vista del usuario, un salvapantallas es un programa ejecutable (si bien con extensi&oacute;n SCR) que puede configurarse, y que, transcurrido un tiempo establecido –y si el sistema no detecta actividad de rat&oacute;n o de teclado -, es lanzado autom&aacute;ticamente por &eacute;ste, oscureciendo la pantalla, ocultando el rat&oacute;n, y mostrando secuencias de im&aacute;genes o figuras geom&eacute;tricas m&aacute;s o menos elaboradas, que tienen como objetivo proteger la pantalla del desgaste adicional que supone su funcionamiento, especialmente cuando no hay refresco (cambio de la informaci&oacute;n mostrada), y eso implica un bombardeo continuo y repetido de similares secuencias de electrones en id&eacute;nticas zonas del monitor.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Pero un vistazo algo m&aacute;s reflexivo nos llevar&aacute; a la conclusi&oacute;n de que el funcionamiento del programa no es tan simple: </P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>En primer lugar, no es EL PROGRAMA el que se lanza al cabo de cierto tiempo de inactividad, sino EL SISTEMA, el que detecta, primero, la inactividad, y despu&eacute;s (mediante la lectura del Registro), el hecho de que existe un salvapantallas seleccionado, y d&oacute;nde se encuentra, para ejecutarlo a continuaci&oacute;n.</LI></P>
+<P ALIGN="JUSTIFY"><LI>En segundo lugar, y esto es m&aacute;s complejo, los salvapantallas est&aacute;ndar responden al bot&oacute;n derecho del rat&oacute;n mediante un men&uacute; especial como el que se muestra en la figura 1, donde el programa debe responder a 2 peticiones: <B>Probar</B> y <B>Configurar</B>, ya que la tercera y restantes opciones del men&uacute; contextual, tambi&eacute;n son gestionadas por Windows. Para que esto pueda ser manejado internamente por los salvapantallas, cuando elegimos una de esas dos opciones de men&uacute;, el sistema lanza nuestro programa con un par&aacute;metro a&ntilde;adido en la l&iacute;nea de comandos, que deberemos recoger y manipular adecuadamente.</LI></P>
+<P ALIGN="JUSTIFY"><LI>Por si esto fuera poco, el lugar habitual de selecci&oacute;n y configuraci&oacute;n de los salvapantallas, no suele ser el men&uacute; contextual que aparece con el bot&oacute;n derecho, sino la Ventana de Propiedades de Pantalla, </LI></P></UL>
+
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<P ALIGN="CENTER"><IMG SRC="image1.gif" WIDTH=353 HEIGHT=320></P>
+<P ALIGN="CENTER">Figura 1: Men&uacute; contextual un fichero Salvapantallas.</P>
+<P ALIGN="CENTER">&nbsp;</P>
+<P ALIGN="CENTER">&nbsp;</P>
+<P ALIGN="JUSTIFY">en la solapa correspondiente al Protector de Pantalla (Ver Figura 2) donde se permite, as&iacute; mismo, la selecci&oacute;n, configuraci&oacute;n y prueba del mismo, con una serie de particularidades adicionales que veremos m&aacute;s adelante, entre las que cabe destacar la protecci&oacute;n por contrase&ntilde;a, y la descarga autom&aacute;tica de una instancia del salvapantallas cada vez que el usuario selecciona un bot&oacute;n distinto (<I>Selecci&oacute;n</I>, <I>Configuraci&oacute;n</I>, <I>Presentaci&oacute;n Preliminar</I>).</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Pensemos en este ultimo aspecto: La forma de <I>decir</I> a un programa salvapantallas que se le quiere ejecutar en modo Previsualizaci&oacute;n (en la peque&ntilde;a ventana que simula la pantalla de la P&aacute;gina de Propiedades), o en modo Configuraci&oacute;n o Demostraci&oacute;n es mediante el paso de los siguientes par&aacute;metros:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">1) Modo Previsualizaci&oacute;n: </P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">&#9;Se produce al pinchar en el ListBox de <I>Selecci&oacute;n de Salvapantallas</I> de la ventana Propiedades de Pantalla. El sistema lanza el salvapantallas y le pasa los par&aacute;metros &quot;/p&quot; y un &lt;handle&gt; donde el primero es la cadena que nos indicadora del modo de lanzamiento, y el segundo valor es el manejador de la ventana de previsualizaci&oacute;n, que deber&aacute; utilizarse para presentar la salida en esa ventana.</P>
+<P>&nbsp;</P>
+<P ALIGN="JUSTIFY">2) Modo Configuraci&oacute;n:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">&#9;Se debe de lanzar desde dos escenarios distintos: al seleccionar <B>Configurar</B> en el men&uacute; contextual (Figura 1), o al seleccionar <B>Configuraci&oacute;n</B> en el men&uacute; de Propiedades de Pantalla. En el primer caso el programa recibe la cadena vac&iacute;a (&quot;&quot;) y en el segundo, &quot;/c&quot;. Aqu&iacute;, la acci&oacute;n a realizar ser&aacute; lanzar una caja de di&aacute;logo en la que el usuario pueda establecer las opciones de ejecuci&oacute;n del salvapantallas (tipo de gr&aacute;ficos a mostrar, tiempo de retardo entre ellos, etc.)</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">3) Modo Demostraci&oacute;n</P>
+<P>&nbsp;</P>
+<P ALIGN="JUSTIFY">&#9;Esta situaci&oacute;n se produce al llamar al programa con la opci&oacute;n <B>Probar </B>desde el men&uacute; contextual, o al seleccionar la opci&oacute;n <B>Presentaci&oacute;n preliminar</B>, de la ventana Propiedades de Pantalla. En ambos casos, el programa recibe en la l&iacute;nea de comandos la cadena &quot;/s&quot;. La acci&oacute;n a tomar no es otra que la ejecuci&oacute;n del Salvapantallas en modo normal (o sea, como si ejecutara su cometido una vez instalado como salvapantallas por defecto).</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Cada vez que se produce una de &eacute;stas situaciones, Windows  env&iacute;a un mensaje WM_CLOSE (cerrar ventana) a la ventana de previsualizaci&oacute;n (si est&aacute; activa, claro) y acto seguido lanza una nueva instancia del programa con su par&aacute;metro correspondiente.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<P ALIGN="CENTER"><IMG SRC="image2.gif" WIDTH=451 HEIGHT=469></P>
+<P ALIGN="CENTER">Figura 2: La ventana de Propiedades de Pantalla</P>
+<P ALIGN="CENTER">&nbsp;</P>
+<P ALIGN="CENTER">&nbsp;</P>
+<P ALIGN="JUSTIFY">Vemos, por tanto, que Windows no se <I>responsabiliza</I> de cerrar otras instancias ya existentes de nuestro programa salvapantallas, por lo que nos veremos obligamos a hacerlo por nuestra cuenta. La &uacute;nica acci&oacute;n que toma Windows a ese respecto, es, en realidad, la que le ata&ntilde;e directamente, es decir, indicar a la ventana de Previsualizaci&oacute;n que se cierre mediante un mensaje emitido <B>hacia su ventana padre</B> (WM_CLOSE) para permitir que el nuevo salvapantallas (o el mismo, pero seleccionado nuevamente), se ejecute en esa ventana.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">A todo esto hay que a&ntilde;adir el hecho de que los salvapantallas pueden llevar protecci&oacute;n por contrase&ntilde;a. En ese caso, el programa recibe el par&aacute;metro &quot;/a&quot;, tambi&eacute;n seguido de un manejador de ventana que deberemos de usar para situar la caja de di&ntilde;alogo de cambiar contrase&ntilde;a justo encima de ella. (Nota: en Windows NT la gesti&oacute;n de constrase&ntilde;as la realiza el sistema, pero en Windows 95, tenemos que hacerlo por nuestra cuenta.</P>
+</FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><B><FONT FACE="Arial"><P>Resumen de condiciones de funcionamiento</P>
+</B></FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">De modo que, resumiendo, el programa debe de realizar las siguientes acciones en cada situaci&oacute;n:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<B><P ALIGN="JUSTIFY">Modo Demostraci&oacute;n/Ejecuci&oacute;n</B>:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<I><P ALIGN="JUSTIFY">(Par&aacute;metro: &quot;/s&quot;)</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+
+<UL>
+</I><P ALIGN="JUSTIFY"><LI>El programa debe indicar al sistema que hay un salvapantallas en ejecuci&oacute;n. Adem&aacute;s, en el caso de que el programa lleve contrase&ntilde;a, se inhabilitar&aacute;n las teclas CTL-ALT-DEL, ALT-TAB y CTL-ESC, para evitar una salida por la <I>puerta falsa</I>.</LI></P>
+<P ALIGN="JUSTIFY"><LI>Ocultar el rat&oacute;n. Aunque no ser&iacute;a estrictamente necesario es una pr&aacute;ctica aceptada, y adem&aacute;s algunos gr&aacute;ficos pueden tener problemas a la hora de dibujar por debajo del &aacute;rea de rat&oacute;n.</LI></P>
+<P ALIGN="JUSTIFY"><LI>Realizar la labor gr&aacute;fica que se haya configurado. Piense el lector en las implicaciones de esto. Para dibujar o mostrar gr&aacute;ficos almacenados (como es el caso de este salvapantallas), se debe disponer de un formulario, que, adem&aacute;s, cubra toda la pantalla para poder recibir los eventos de teclado y rat&oacute;n a los que debe responder adecuadamente. Incluso si estuvi&eacute;ramos en una pantalla neutra, es nuestra ventana la que recibe las pulsaciones y debe comprobar si existe una contrase&ntilde;a activada. Para ello, leeremos del registro los par&aacute;metros de la situaci&oacute;n y actuaremos mostrando la caja de di&aacute;logo de introducir contrase&ntilde;a, mientras –simult&aacute;neamente- se sigue ejecutando el programa detr&aacute;s de esa ventana hasta que el usuario haya introducido la contrase&ntilde;a o haya transcurrido un tiempo determinado (un minuto). En caso de que el usuario seleccione la contrase&ntilde;a correcta hay que dejar todo como estaba: volver a mostrar el cursor, rehabilitar las combinaciones de teclas especiales, y eliminar la ventana de ejecuci&oacute;n. En realidad, &eacute;sta situaci&oacute;n podr&iacute;a considerarse como un modo de ejecuci&oacute;n distinto, en tanto en cuanto se intenta lanzar una instancia del programa que recibe el par&aacute;metro &quot;/a&quot; + &lt;Handle&gt;, donde &lt;Handle&gt; es el manejador de la ventana de ejecuci&oacute;n.</LI></P>
+<P ALIGN="JUSTIFY"><LI>Para conseguir que la ejecuci&oacute;n contin&uacute;e incluso cuando aparezca la caja de di&aacute;logo de contrase&ntilde;a, deberemos hacer que el funcionamiento de la ventana de ejecuci&oacute;n este controlado por un temporizador (control Timer), lo que –a su vez- puede tener otros efectos colaterales indeseados: por ejemplo, el usuario puede invocar el procedimiento de nuevo antes de que el tiempo haya transcurrido, lo que se puede evitar haciendo uso de alguna variable l&oacute;gica que establezca un control de situaci&oacute;n. </LI></P></UL>
+
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<B><P ALIGN="JUSTIFY">Modo Configuraci&oacute;n:</P>
+</B><P ALIGN="JUSTIFY">&nbsp;</P>
+<I><P ALIGN="JUSTIFY">(Par&aacute;metros: &quot;/c&quot;, &quot;&quot;)</P>
+</I><P ALIGN="JUSTIFY">&nbsp;</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>Lanzar una ventana de configuraci&oacute;n, en la que deber&aacute; de mantenerse la posibilidad de lectura/escritura del registro para guardar la configuraci&oacute;n en un lugar seguro. Adem&aacute;s el usuario puede incluir posibilidades adicionales, o darle al Salvapantallas un &quot;valor a&ntilde;adido&quot;, como sucede en &eacute;ste caso, en el que permitimos que la pantalla de configuraci&oacute;n sea, al mismo tiempo, un visualizador/organizador de gr&aacute;ficos.</LI></P>
+<P ALIGN="JUSTIFY"><LI>La ventana de propiedades debe establecerse como ventana hija o como ventana no modal descendiente de Propiedades de Pantalla. Piense el lector que no habr&iacute;a nada que impidiese lanzar dicha ventana tantas veces como se deseara, provocando todo tipo de efectos en el registro, etc.</LI></P></UL>
+
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<B><P ALIGN="JUSTIFY">Modo Previsualizaci&oacute;n:</P>
+</B><P ALIGN="JUSTIFY">&nbsp;</P>
+<I><P ALIGN="JUSTIFY">(Par&aacute;metros: &quot;/p&quot; &lt;Handle&gt;)</P>
+</I><P ALIGN="JUSTIFY">&nbsp;</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>Debemos reflejar el estado actual de la configuraci&oacute;n.</LI></P>
+<P ALIGN="JUSTIFY"><LI>Lanzaremos una instancia que se ejecute en la Ventana de Previsualizaci&oacute;n. Esto requiere averiguar (a partir de &lt;Handle&gt;, que es el manejador de la ventana de Previsualizaci&oacute;n, cu&aacute;l es  la superficie disponible y declarar a nuestra ventana de demostraci&oacute;n como ventana hija de &eacute;sta, que es quien recibe todos los mensajes de cierre cuando el sistema detecta que otra aplicaci&oacute;n est&aacute; intentando hacer algo, o bien que se ha seleccionado otra opci&oacute;n dentro de la Ventana de Propiedades. A su vez, esto requerir&aacute; desplazar el control que utilicemos como elemento de visualizaci&oacute;n a esa posici&oacute;n, para actuar como si el Salvapantallas se estuviera ejecutando exclusivamente en la peque&ntilde;a ventana de previsualizaci&oacute;n (con todos los problemas colaterales que ello supone: la ventana puede moverse durante la ejecuci&oacute;n, ser tapada por otra ventana (provocando subsiguientes eventos Paint, etc.). Adem&aacute;s  debemos de cerrarla en cuanto se reciba un mensaje de cierre (WM_CLOSE), por parte de la ventana &quot;padre&quot;.</LI></P></UL>
+
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Una vez visto el panorama desde el punto de vista de los requerimientos, podemos hacer un dise&ntilde;o de aplicaci&oacute;n similar al del Diagrama 1, en el cual, el programa consta finalmente de 3 formularios y un m&oacute;dulo de c&oacute;digo que har&aacute; las veces de arranque de la aplicaci&oacute;n, comprobando el par&aacute;metro que se recibe del sistema para actuar en consecuencia.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Adem&aacute;s, har&aacute; falta utilizar t&eacute;cnicas de subclasificaci&oacute;n para capturar los mensajes dirigidos a la ventana de previsualizaci&oacute;n y el uso de otras funciones del API de Windows, por lo que tendremos que declarar un buen n&uacute;mero de funciones para su utilizaci&oacute;n posterior, adem&aacute;s de las constantes predefinidas y estructuras que tales funciones requieren para su puesta en marcha. </P>
+</FONT><FONT SIZE=2><P></P>
+<P>&nbsp;</P>
+<P></P>
+<P>&nbsp;</P>
+<P></P>
+<P ALIGN="CENTER"><IMG SRC="diagra.gif" ></P>
+
+<P ALIGN="CENTER">Diagrama 1: Flujo de la aplicaci&oacute;n Salvapantallas</P>
+<P ALIGN="CENTER">&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">Como puede verse, partimos de la rutina <I>Sub Main</I>, y comprobamos el tipo de situaci&oacute;n recogiendo el par&aacute;metro enviado al programa por parte de Windows. Dependiendo de ese par&aacute;metro, lanzamos el formulario adecuado:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Vayamos, pues, al c&oacute;digo fuente. Primero, creamos un m&oacute;dulo general (Principal.BAS), donde situamos todas las declaraciones necesarias parar el funcionamiento, as&iacute; como las que requiere el uso del API de Windows:</P>
+<P ALIGN="JUSTIFY"> </P>
+</FONT><FONT SIZE=2><P>&nbsp;</P>
+</FONT><FONT FACE="Courier" SIZE=1><P>M&oacute;dulo: <B>PRINCIPAL.BAS</P>
+</B><P>&nbsp;</P>
+<P>‘Grupo EIDOS, Noviembre de 1997</P>
+<I><P ALIGN="JUSTIFY">‘Este c&oacute;digo y el correspondiente a todos los m&oacute;dulos y formularios de &eacute;ste ‘ejemplo se presentan &quot;tal como est&aacute;n&quot;, sin que eso implique responsabilidad ‘alguna hacia terceras partes con respecto a la utilizaci&oacute;n que pueden hacer ‘del mismo. As&iacute; mismo, est&aacute; totalmente libre de derechos y el lector puede ‘modificarlo, copiarlo, o utilizarlo en sus propios programas seg&uacute;n desee.</P>
+</I><P>&nbsp;</P>
+<P>Option Explicit</P>
+<P>&nbsp;</P>
+<P>Type WINDOWPOS</P>
+<P>        hWnd As Long</P>
+<P>        hWndInsertAfter As Long</P>
+<P>        x As Long</P>
+<P>        y As Long</P>
+<P>        cx As Long</P>
+<P>        cy As Long</P>
+<P>        flags As Long</P>
+<P>End Type</P>
+<P>&nbsp;</P>
+<P>Type POINTAPI</P>
+<P>        x As Long</P>
+<P>        y As Long</P>
+<P>End Type</P>
+<P>&nbsp;</P>
+<P>Type RECT 'Usado por GetClientRect y GetWindowRect</P>
+<P>        Left As Long</P>
+<P>        Top As Long</P>
+<P>        Right As Long</P>
+<P>        Bottom As Long</P>
+<P>End Type</P>
+<P>&nbsp;</P>
+<P>Type OsVersionInfo  'Utilizado por la funci&oacute;n InfoSistema</P>
+<P>    dwVersionInfoSize As Long</P>
+<P>    dwMajorVersion As Long</P>
+<P>    dwMinorVersion As Long</P>
+<P>    dwBuildNumber As Long</P>
+<P>    dwPlatform As Long</P>
+<P>    szCSDVersion As String * 128</P>
+<P>End Type</P>
+<P>&nbsp;</P>
+<P>'--------------------------------------------------------------------------</P>
+<P>'API de Win32</P>
+<P>'--------------------------------------------------------------------------</P>
+<P>Private Declare Function CreateDC&amp; Lib "gdi32" Alias "CreateDCA" (ByVal lpDriverName$, ByVal lpDeviceName$, ByVal lpOutput$, ByVal lpInitData&amp;)</P>
+<P>Private Declare Function DeleteDC&amp; Lib "gdi32" (ByVal hDC&amp;)</P>
+<P>Private Declare Function FindWindow&amp; Lib "user32" Alias "FindWindowA" (ByVal lpClassName$, ByVal lpWindowName$)</P>
+<P>Public Declare Function GetClientRect&amp; Lib "user32" (ByVal hWnd&amp;, lpRect As RECT)</P>
+<P>Private Declare Function GetVersionEx&amp; Lib "kernel32" Alias "GetVersionExA" (lpStruct As OsVersionInfo)</P>
+<P>Public Declare Function GetWindowRect&amp; Lib "user32" (ByVal hWnd&amp;, lpRect As RECT)</P>
+<P>Public Declare Function IsWindow&amp; Lib "user32" (ByVal hWnd&amp;)</P>
+<P>Private Declare Function PwdChangePassword&amp; Lib "mpr" Alias "PwdChangePasswordA" (ByVal lpcRegkeyname$, ByVal hWnd&amp;, ByVal uiReserved1&amp;, ByVal uiReserved2&amp;)</P>
+<P>Private Declare Function RegCloseKey&amp; Lib "advapi32.dll" (ByVal HKey&amp;)</P>
+<P>Private Declare Function RegOpenKeyExA&amp; Lib "advapi32.dll" (ByVal HKey&amp;, ByVal lpszSubKey$, dwOptions&amp;, ByVal samDesired&amp;, lpHKey&amp;)</P>
+<P>Private Declare Function RegQueryValueExA&amp; Lib "advapi32.dll" (ByVal HKey&amp;, ByVal lpszValueName$, lpdwRes&amp;, lpdwType&amp;, ByVal lpDataBuff$, nSize&amp;)</P>
+<P>Public Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long</P>
+<P>Public Declare Function SetParent&amp; Lib "user32" (ByVal hWndChild As Long, ByVal hWndNewParent As Long)</P>
+<P>Public Declare Function SetWindowLong&amp; Lib "user32" Alias "SetWindowLongA" (ByVal hWnd&amp;, ByVal nIndex&amp;, ByVal dwNewLong&amp;)</P>
+<P>Public Declare Function SetWindowPos Lib "user32" (ByVal h&amp;, ByVal hb&amp;, ByVal x&amp;, ByVal y&amp;, ByVal cx&amp;, ByVal cy&amp;, ByVal f&amp;) As Integer</P>
+<P>Public Declare Function ShowCursor&amp; Lib "user32" (ByVal bShow&amp;)</P>
+<P>Private Declare Function StretchBlt&amp; Lib "gdi32" (ByVal hDestDC&amp;, ByVal x&amp;, ByVal y&amp;, ByVal nWidth&amp;, ByVal nHeight&amp;, ByVal hSrcDC&amp;, ByVal XSrc&amp;, ByVal YSrc&amp;, ByVal nSrcWidth&amp;, ByVal nSrcHeight&amp;, ByVal dwRop&amp;)</P>
+<P>Public Declare Function SystemParametersInfo Lib "user32" Alias "SystemParametersInfoA" (ByVal uAction As Long, ByVal uParam As Long, lpvParam As Any, ByVal fuWinIni As Long) As Long</P>
+<P>Public Declare Function VerifyScreenSavePwd Lib "password.cpl" (ByVal hWnd&amp;) As Boolean</P>
+<P>&nbsp;</P>
+<P>'Funci&oacute;n y constantes para SubClasificaci&oacute;n</P>
+<P>Private Declare Function CallWindowProc&amp; Lib "user32" Alias "CallWindowProcA" (ByVal wndrpcPrev&amp;, ByVal hWnd&amp;, ByVal uMsg&amp;, ByVal wParam&amp;, lParam As Any)</P>
+<P>Private Const GWL_WNDPROC = -4</P>
+<P>Private hManejador As Long</P>
+<P>&nbsp;</P>
+<P>'Constantes generales</P>
+<P>Public Const WM_CLOSE = &amp;H10</P>
+<P>Public Const SWP_NOMOVE = &amp;H2</P>
+<P>Public Const SWP_NOSIZE = 1</P>
+<P>Public Const SW_SHOWNORMAL = 1</P>
+<P>Public Const flags = SWP_NOMOVE Or SWP_NOSIZE</P>
+<P>Public Const HWND_TOPMOST = -1</P>
+<P>Public Const SRCCOPY = &amp;HCC0020</P>
+<P>Public Const HKEY_CURRENT_USER = &amp;H80000001</P>
+<P>Public Const SPI_SCREENSAVERRUNNING = 97&amp;</P>
+<P>Public Const Win95 = 1&amp;</P>
+<P>Public Const WinNT = 2&amp;</P>
+<P>Public Const SW_NORMAL = 1</P>
+<P>Public Const HWND_TOP = 0</P>
+<P>Public Const SWP_FRAMECHANGED = &amp;H20</P>
+<P>Public Const SWP_DRAWFRAME = SWP_FRAMECHANGED</P>
+<P>Public Const SWP_SHOWWINDOW = &amp;H40</P>
+<P>&nbsp;</P>
+<P>'Permisos de lectura de registro</P>
+<P>Private Const KEY_QUERY_VALUE = &amp;H1&amp;</P>
+<P>Private Const KEY_ENUMERATE_SUB_KEYS = &amp;H8&amp;</P>
+<P>Private Const KEY_NOTIFY = &amp;H10&amp;</P>
+<P>Private Const READ_CONTROL = &amp;H20000</P>
+<P>Private Const STANDARD_RIGHTS_READ = READ_CONTROL</P>
+<P>Private Const Key_Read = STANDARD_RIGHTS_READ Or KEY_QUERY_VALUE Or KEY_ENUMERATE_SUB_KEYS Or KEY_NOTIFY</P>
+<P>Private Const REG_DWORD = 4&amp;</P>
+<P>&nbsp;</P>
+<P>'Variables p&uacute;blicas</P>
+<P>Public HayPWD As Integer    'Indicador de PWD establecida</P>
+<P>Public hVentanaPreV As Long 'Manejador de ventana de Previsualizaci&oacute;n</P>
+<P>Public AreaCliente As RECT  'Area cliente de la ventana de PreVisualizaci&oacute;n</P>
+<P>Public Ratonazo As Integer  'N&uacute;mero de "ratonazos" (mov. de rat&oacute;n)</P>
+<P>Public HayPrevisual As Boolean 'Bandera para control del Timer</P>
+<P>Public Pixels_X As Integer</P>
+<P>Public Pixels_Y As Integer</P>
+<P>Public aImagen As Variant   'Array de im&aacute;genes a mostrar</P>
+<P>Public nCurImg As Integer   'Imagen actual</P>
+<P>Public nTotalImg As Integer 'Total de im&aacute;genes</P>
+<P>Public Retardo As Long   'Tiempo de retardo entre im&aacute;genes</P>
+<P>'Para control de tipo y versi&oacute;n del sistema operativo</P>
+<P>Public SistemaOp As Long</P>
+<P>Private VersionSistema As OsVersionInfo</P>
+<P>&nbsp;</P>
+<P>Sub InfoSistema()</P>
+<P>&nbsp;</P>
+<P>    VersionSistema.dwVersionInfoSize = 148&amp;</P>
+<P>    Call GetVersionEx(VersionSistema)</P>
+<P>    SistemaOp = VersionSistema.dwPlatform</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Function RegGetValue$(MainKey&amp;, SubKey$, value$)</P>
+<P>   </P>
+<P>   'La clave principal debe estar declarada como HKEY p&uacute;blica</P>
+<P>   Dim sKeyType&amp;           'Tipo de clave. Espera REG_SZ</P>
+<P>   Dim ret&amp;                'Devuelto por las funciones del registro. Espera 0&amp;</P>
+<P>   Dim lpHKey&amp;             'Manejador de la clave abierta</P>
+<P>   Dim lpcbData&amp;           'Longitud de la cadena devuelta</P>
+<P>   Dim ReturnedString$     'Cadena devuelta</P>
+<P>   Dim fTempDbl!</P>
+<P>   If MainKey &gt;= &amp;H80000000 And MainKey &lt;= &amp;H80000006 Then</P>
+<P>      ' Abrimos la clave</P>
+<P>      ret = RegOpenKeyExA(MainKey, SubKey, 0&amp;, Key_Read, lpHKey)</P>
+<P>      If ret &lt;&gt; 0 Then</P>
+<P>         RegGetValue = ""</P>
+<P>         Exit Function     'No hay clave abierta-&gt; Salimos</P>
+<P>      End If</P>
+<P>      </P>
+<P>      ' Establece buffer para valor de retorno</P>
+<P>      ' Ajusta el valor siguiente para buffers m&aacute;s largos</P>
+<P>      lpcbData = 255</P>
+<P>      ReturnedString = Space$(lpcbData)</P>
+<P>&nbsp;</P>
+<P>      ' Leer la clave del registro</P>
+<P>      ret&amp; = RegQueryValueExA(lpHKey, value, ByVal 0&amp;, sKeyType, ReturnedString, lpcbData)</P>
+<P>      If ret &lt;&gt; 0 Then</P>
+<P>         'Si la clave est&aacute; todav&iacute;a abierta, salir</P>
+<P>         RegGetValue = ""</P>
+<P>      Else</P>
+<P>        If sKeyType = REG_DWORD Then</P>
+<P>            fTempDbl = Asc(Mid$(ReturnedString, 1, 1)) + &amp;H100&amp; * Asc(Mid$(ReturnedString, 2, 1)) + &amp;H10000 * Asc(Mid$(ReturnedString, 3, 1)) + &amp;H1000000 * CDbl(Asc(Mid$(ReturnedString, 4, 1)))</P>
+<P>            ReturnedString = Format$(fTempDbl, "000")</P>
+<P>        End If</P>
+<P>        RegGetValue = Left$(ReturnedString, lpcbData - 1)</P>
+<P>    End If</P>
+<P>      'Como medida de precauci&oacute;n siempre cerrar las claves</P>
+<P>      'al salir</P>
+<P>      ret = RegCloseKey(lpHKey)</P>
+<P>   End If</P>
+<P>   </P>
+<P>End Function</P>
+<P>&nbsp;</P>
+<P>Sub Main()</P>
+<P>    </P>
+<P>    Dim cModo As String</P>
+<P>    </P>
+<P>    'Comprobamos en el registro la lista de im&aacute;genes y el retardo</P>
+<P>    aImagen = GetAllSettings("EidosView", "Lista")</P>
+<P>    If IsEmpty(aImagen) Then</P>
+<P>        nTotalImg = 0</P>
+<P>    Else</P>
+<P>        nTotalImg = UBound(aImagen)</P>
+<P>    End If</P>
+<P>    </P>
+<P>    'Comprobamos el retardo y ajustamos Timers</P>
+<P>    Retardo = Val(GetSetting("EidosView", "Retardo", "Segundos"))</P>
+<P>    Retardo = IIf(Retardo = 0, 3000, Retardo)</P>
+<P>    </P>
+<P>    'La m&eacute;trica del sistema</P>
+<P>    Pixels_X = Screen.TwipsPerPixelX</P>
+<P>    Pixels_Y = Screen.TwipsPerPixelY</P>
+<P>    </P>
+<P>    cModo = UCase(Left$(Command, 2))</P>
+<P>    </P>
+<P>    Select Case cModo</P>
+<P>        Case "/C", ""</P>
+<P>        </P>
+<P>            'Hay que comprobar que no est&aacute; en ejecuci&oacute;n la ventana</P>
+<P>            'de configuraci&oacute;n. Si es as&iacute;, -y al estar en otro proceso</P>
+<P>            'distinto-, debemos terminar nuestra instancia activando</P>
+<P>            'previamente la que se encuentra en ejecuci&oacute;n. La funci&oacute;n</P>
+<P>            'EsUnico, nos devuelve un 0 &oacute; un manejador de ventana si</P>
+<P>            '&eacute;sta existe.</P>
+<P>            hManejador = EsUnico("Configuraci&oacute;n del Salvapantallas EIDOSView")</P>
+<P>            If hManejador &lt;&gt; 0 Then</P>
+<P>               SetForegroundWindow hManejador</P>
+<P>               End</P>
+<P>               Exit Sub</P>
+<P>            End If</P>
+<P>            frmConfig.Show</P>
+<P>        </P>
+<P>        Case "/S"</P>
+<P>        </P>
+<P>            'El sistema puede iniciar m&aacute;s de una sesi&oacute;n, as&iacute; que</P>
+<P>            'hay que comprobar la existencia de una instancia</P>
+<P>            'previa. El problema surge con el hecho que se comenta</P>
+<P>            'a prop&oacute;sito del evento MouseMove del formulario</P>
+<P>            'principal: cuando la instancia se lanza en modo de</P>
+<P>            'Previsualizaci&oacute;n (Desde la Caja de Di&aacute;logo de</P>
+<P>            'Propiedades de Pantalla), primero se lanza la segunda</P>
+<P>            'instancia y despu&eacute;s se cierra la primera. Eso hace</P>
+<P>            'in&uacute;til en &eacute;ste caso el uso de App.PrevInstance siendo</P>
+<P>            'necesario recurrir a una comprobaci&oacute;n a nivel de API</P>
+<P>            'que se realiza con la funci&oacute;n FindWindow.</P>
+<P>            'FindWindow busca una ventana en ejecuci&oacute;n por el</P>
+<P>            'contenido de su propiedad Caption: una vez encontrada</P>
+<P>            'se cierra la aplicaci&oacute;n.</P>
+<P>&nbsp;</P>
+<P>            If EsUnico("EidosView-Ejecucion") &lt;&gt; 0 Then</P>
+<P>                Exit Sub</P>
+<P>            End If</P>
+<P>            frmEjecucion.Show</P>
+<P>        </P>
+<P>        Case "/P"</P>
+<P>            </P>
+<P>            'En este caso, se recibe -junto a "/p"-, un manejador</P>
+<P>            'para la ventana de Propiedades de Pantalla, que se utiliza</P>
+<P>            'para situar la salida del formulario de Previsualizaci&oacute;n</P>
+<P>            hVentanaPreV = Val(Right$(Command, Len(Command) - 2))</P>
+<P>            Load frmPrevisual</P>
+<P>            </P>
+<P>        Case "/A"</P>
+<P>        </P>
+<P>            'Aqu&iacute;,tambi&eacute;n se recibe -junto a "/a"-, un manejador</P>
+<P>            'de la ventana de Propiedades de Pantalla. Ese manejador es</P>
+<P>            'parte de la funci&oacute;n PwdChangePassword  y sit&uacute;a la caja de</P>
+<P>            'Di&aacute;logo sobre la ventana de propiedades.</P>
+<P>            hVentanaPreV = Val(Right$(Command, Len(Command) - 2))</P>
+<P>            Call PwdChangePassword("SCRSAVE", hVentanaPreV, 0, 0)</P>
+<P>  </P>
+<P>    End Select</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Function EsUnico(Titulo As String) As Long</P>
+<P>    </P>
+<P>    'Buscar una ventana con una Caption determinada y devuelve 0</P>
+<P>    'si no la encuentra, y sino, el manejador de la misma</P>
+<P>    Dim hWnd As Long</P>
+<P>    hWnd = FindWindow(vbNullString, Titulo)</P>
+<P>    EsUnico = IIf(hWnd = 0, 0, hWnd)</P>
+<P>    </P>
+<P>End Function</P>
+<P>&nbsp;</P>
+<P>Public Function Proc_Ventana(ByVal hWnd As Long, ByVal MsgVal As Long, ByVal wParam As Long, ByVal lParam As Long) As Long</P>
+<P>&nbsp;</P>
+<P>    'Este es un ejemplo de Subclasificaci&oacute;n usando AddressOf. Se pretende</P>
+<P>    'capturar los mensajes del tipo WM_CLOSE dirigidos al control que haga</P>
+<P>    'las veces de visualizador de im&aacute;genes, cuando la Ventana de Propiedades</P>
+<P>    'haya desaparecido o si ha tenido lugar alg&uacute;n otro suceso.</P>
+<P>    'Esta es la raz&oacute;n por la que se prefiere utilizar un control PictureBox</P>
+<P>    'en lugar de un control Image en la ventana de PreVisualizaci&oacute;n. El</P>
+<P>    'control Image no dispone de propiedades hWnd y/o hDC (manejadores de</P>
+<P>    'ventana y/o contexto de dispositivo), debido a que no es REALMENTE una</P>
+<P>    'ventana, sino, m&aacute;s bien, un conjunto de instrucciones de dibujo. (Para</P>
+<P>    'm&aacute;s informaci&oacute;n sobre &eacute;stos aspectos, el lector puede recurrir a la</P>
+<P>    'escelente obra de Daniel Appleman, "Visual Basic 5.0. Programmer's</P>
+<P>    'Guide to the Win32 API", que recoge todo tipo de detalles al respecto.</P>
+<P>    </P>
+<P>    If hManejador = 0 Then</P>
+<P>    </P>
+<P>        'Otra curiosidad de las "retrollamadas" o funciones "CallBack":</P>
+<P>        'como se trata de c&oacute;digo en el cual Windows llama a nuestra funci&oacute;n</P>
+<P>        'y no al rev&eacute;s, se podr&iacute;a dar el caso de que Windows intentara</P>
+<P>        'llamar a la funci&oacute;n, cuando la ventana ya no exista. Si ese es el</P>
+<P>        'caso (manejador de ventana = 0), nos salimos.</P>
+<P>        Exit Function</P>
+<P>    End If</P>
+<P>    Select Case MsgVal</P>
+<P>        Case WM_CLOSE</P>
+<P>            </P>
+<P>            'Situamos el control PictureBox de nuevo donde estaba en un</P>
+<P>            'comienzo</P>
+<P>            Call SetParent(frmPrevisual.Picture1.hWnd, frmPrevisual.hWnd)</P>
+<P>            </P>
+<P>            'Desconectamos la Bandera de control para que el Timer</P>
+<P>            'provoque la salida, en lugar de dibujar en el control</P>
+<P>            HayPrevisual = False</P>
+<P>            </P>
+<P>            'Cualquier ventana que procese un mensaje WM_CLOSE debe</P>
+<P>            'devolver un 0 a Windows</P>
+<P>            Proc_Ventana = 0</P>
+<P>            Exit Function</P>
+<P>    </P>
+<P>    End Select</P>
+<P>    </P>
+<P>    'Si quisi&eacute;ramos procesar otros mensajes, situar&iacute;amos el c&oacute;digo dentro</P>
+<P>    'de la estructura Select Case. El resto de los mensajes se los pasamos</P>
+<P>    'al manejador de mensajes del control PictureBox</P>
+<P>    Proc_Ventana = CallWindowProc(hManejador, hWnd, MsgVal, wParam, ByVal lParam)</P>
+<P>    </P>
+<P>End Function</P>
+<P>&nbsp;</P>
+<P>Public Sub Capturar(hWnd As Long)</P>
+<P>&nbsp;</P>
+<P>    'Devuelve el manejador de la ventana referenciada por hWnd, y le pasa</P>
+<P>    'como par&aacute;metros GWL_WNDPROC (que establece una nueva direcci&oacute;n para</P>
+<P>    'el procedimiento de ventana) y un puntero al procedimiento de Ventana</P>
+<P>    'definido por nosotros para que cuando Windows emita un mensaje, pase</P>
+<P>    'primero por ese procedimiento.</P>
+<P>    </P>
+<P>    'Para m&aacute;s informaci&oacute;n acerca de funciones declaradas con argumentos</P>
+<P>    'que son punteros a funciones, referimos al lector a "The C++</P>
+<P>    'Programming Language, Second Edition", de Bjarne Stroustrup.</P>
+<P>    hManejador = SetWindowLong(hWnd, GWL_WNDPROC, AddressOf Proc_Ventana)</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Public Sub Liberar(hWnd As Long)</P>
+<P>&nbsp;</P>
+<P>    'S&oacute;lo liberamos si no lo est&aacute; todav&iacute;a</P>
+<P>    If hManejador Then</P>
+<P>        SetWindowLong hWnd, GWL_WNDPROC, hManejador</P>
+<P>        hManejador = 0</P>
+<P>    End If</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+</FONT><FONT SIZE=2><P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">Como el lector puede comprobar, se ha comentado con profusi&oacute;n el c&oacute;digo fuente al objeto de que se pueda seguir la l&oacute;gica del programa en cada momento. Adem&aacute;s, aparte de la dificultad que pueda entra&ntilde;ar la comprensi&oacute;n de los porqu&eacute;s de ciertas llamadas al API de Windows, por lo dem&aacute;s, el c&oacute;digo fuente no tiene nada de especial, si bien hay que indicar que dentro de la rutina de configuraci&oacute;n hacemos uso de un control de dominio p&uacute;blico que se adjunta al c&oacute;digo fuente y que el lector puede usar sin limitaci&oacute;n: se trata de un control para visualizar la estructura de unidades de disco y sus directorios, que est&aacute; construido en Visual Basic seg&uacute;n sus autores y que pretende ser un puente sencillo a la utilizaci&oacute;n de llamadas al API a trav&eacute;s de una clase preparada al efecto. En el fichero CCRPBD.ZIP que acompa&ntilde;a al c&oacute;digo fuente, el lector podr&aacute; comprobar como se incluye el control, y un ejemplo de su utilizaci&oacute;n en Visual Basic.</P>
+</FONT><FONT SIZE=2><P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">En lo referente al fichero de configuraci&oacute;n, hay que se&ntilde;alar que se ha hecho un peque&ntilde;o ejercicio sobre las capacidades gr&aacute;ficas y de gesti&oacute;n de ficheros de VB5. Se trata de un visualizador de gr&aacute;ficos, que dispone de 3 pantallas b&aacute;sicas: una para la previsualizaci&oacute;n de los gr&aacute;ficos, otra para el control de la lista de gr&aacute;ficos seleccionados, y una tercera para poder revisar la lista de gr&aacute;ficos seleccionados. (Ver Fig. 3). Aunque la inclusi&oacute;n del control de gesti&oacute;n de directorios antes mencionado no era imprescindible, ya que el control DirListbox ya puede gestionar ese aspecto suficientemente, se ha incluido esta posibilidad para ofrecer otra visi&oacute;n alternativa.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Tambi&eacute;n podr&aacute; observar el lector c&oacute;mo se han utilizado t&eacute;cnicas de &quot;stretching&quot;, o <I>compresi&oacute;n </I>de im&aacute;genes de forma que cupiesen exactamente en el control que sirve para mostrarlas, seg&uacute;n se seleccione por el usuario. El problema es que cuando se muestran im&aacute;genes de calidad, la compresi&oacute;n produce una p&eacute;rdida de su &quot;aspect ratio&quot;, o patr&oacute;n de escala para acomodarse al tama&ntilde;o de los controles, produciendo efectos indeseados de visualizaci&oacute;n.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">As&iacute; mismo, queremos recordar que en &eacute;sta versi&oacute;n de Visual Basic ya no es necesario utilizar las llamadas al API BitBlt() y/o StrechBlt() para esas cuestiones, ya que, tanto los formularios como el control PictureBox disponen de los m&eacute;todos Move y PaintPicture, que permiten realizar las mismas funciones sin necesidad de llamadas al API, y siempre que sea posible y –si no hay una raz&oacute;n de peso- es preferible utilizar los recursos del propio lenguaje.</P>
+<P>&nbsp;</P>
+<P ALIGN="JUSTIFY">De igual forma, y para asegurar que en el m&oacute;dulo de configuraci&oacute;n el usuario pueda incluir los elementos que prefiera, no se utiliza el API de Windows, optando por guardar los valores de configuraci&oacute;n el apartado <I>VB y VBA para Aplicaciones</I>, que permite el acceso mediante las instrucciones Visual Basic <I>SaveSetting/GetSetting</I>, si bien en otras partes de la aplicaci&oacute;n no queda m&aacute;s remedio que usar el API para establecer y/o leer los valores de configuraci&oacute;n del sistema (indicar al sistema que se est&aacute; ejecutando un Salvapantallas, establecer/leer el estado de protecci&oacute;n por contrase&ntilde;a, etc.) </P>
+</FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P>A continuaci&oacute;n se lista el c&oacute;digo de frmConfig</P>
+<B><P>&nbsp;</P>
+<P>Fuente: frmConfig.frm</P>
+</B></FONT><FONT SIZE=2><P>&nbsp;</P>
+<P>‘Autor: Marino Posadas (Grupo Eidos)</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Courier" SIZE=1><P>Option Explicit</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbA&ntilde;adirDir_Click()</P>
+<P>    </P>
+<P>    On Error GoTo Errores</P>
+<P>    </P>
+<P>    If filFicheros.ListCount = 0 Then</P>
+<P>        MsgBox "El directorio no contiene im&aacute;genes", vbExclamation, "Aviso"</P>
+<P>    Else</P>
+<P>        'A&ntilde;adir el directorio al Listbox de ficheros seleccionados</P>
+<P>        Dim i As Integer</P>
+<P>        For i = 0 To filFicheros.ListCount - 1</P>
+<P>         lstFicheros.AddItem filFicheros.Path &amp; "\" &amp; filFicheros.List(i)</P>
+<P>        Next</P>
+<P>    End If</P>
+<P>    Exit Sub</P>
+<P>    </P>
+<P>Errores:</P>
+<P>    MsgBox "Se produjo un error en el traspaso de ficheros", vbInformation, "Aviso"</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbElimTodos_Click()</P>
+<P>   </P>
+<P>      lstFicheros.Clear</P>
+<P>   </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbGuardarImg_Click()</P>
+<P>    </P>
+<P>    If lstFicheros.ListCount = 0 Then</P>
+<P>        MsgBox "La lista esta vac&iacute;a", vbInformation, "Aviso"</P>
+<P>        Exit Sub</P>
+<P>    End If</P>
+<P>    BDcfg.Browse</P>
+<P>    If BDcfg.Path &lt;&gt; "" Then</P>
+<P>        On Error GoTo Errores</P>
+<P>        Dim i As Integer, Fichero As String</P>
+<P>        For i = 0 To lstFicheros.ListCount - 1</P>
+<P>            'Obtenemos el nombre del fichero a partir del</P>
+<P>            'nombre completo (Path + Fichero)</P>
+<P>            Fichero = Dir(lstFicheros.List(i))</P>
+<P>            FileCopy lstFicheros.List(i), BDcfg.Path &amp; "\" &amp; Fichero</P>
+<P>        Next</P>
+<P>    End If</P>
+<P>    Exit Sub</P>
+<P>    </P>
+<P>Errores:</P>
+<P>    MsgBox "El proceso se ha interrumpido en el fichero: " &amp; vbCrLf &amp; _</P>
+<P>            lstFicheros.List(i) &amp; "." &amp; vbCrLf &amp; "Compruebe " &amp; _</P>
+<P>            "si hay espacio disponible en la unidad", vbCritical, _</P>
+<P>            "Aviso"</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbPrimero_Click()</P>
+<P>&nbsp;</P>
+<P>   If lstFicheros.ListCount &gt; 0 Then</P>
+<P>      nCurImg = 0</P>
+<P>      MostrarImagen</P>
+<P>      txtFicActual = lstFicheros.List(nCurImg)</P>
+<P>   Else</P>
+<P>      MsgBox "No hay im&aacute;genes en la lista", vbInformation, "Aviso"</P>
+<P>   End If</P>
+<P>   </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbAnterior_Click()</P>
+<P>&nbsp;</P>
+<P>   If nCurImg = 0 Then</P>
+<P>      MsgBox "Ya est&aacute; al principio de la lista", vbInformation, "Aviso"</P>
+<P>   Else</P>
+<P>      nCurImg = nCurImg - 1</P>
+<P>      MostrarImagen</P>
+<P>      txtFicActual = lstFicheros.List(nCurImg)</P>
+<P>   End If</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>Private Sub cmbSiguiente_Click()</P>
+<P>&nbsp;</P>
+<P>   If nCurImg = lstFicheros.ListCount - 1 Then</P>
+<P>      MsgBox "Ya est&aacute; al final de la lista", vbInformation, "Aviso"</P>
+<P>   Else</P>
+<P>      nCurImg = nCurImg + 1</P>
+<P>      MostrarImagen</P>
+<P>      txtFicActual = lstFicheros.List(nCurImg)</P>
+<P>   End If</P>
+<P>   </P>
+<P>End Sub</P>
+<P>Private Sub cmbUltimo_Click()</P>
+<P>&nbsp;</P>
+<P>   If lstFicheros.ListCount &gt; 0 Then</P>
+<P>      nCurImg = lstFicheros.ListCount - 1</P>
+<P>      MostrarImagen</P>
+<P>      txtFicActual = lstFicheros.List(nCurImg)</P>
+<P>   Else</P>
+<P>      MsgBox "No hay im&aacute;genes en la lista", vbInformation, "Eidos"</P>
+<P>   End If</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbCancelar_Click()</P>
+<P>&nbsp;</P>
+<P>   Unload Me</P>
+<P>   </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbEliminar_Click()</P>
+<P>&nbsp;</P>
+<P>   Dim i As Integer</P>
+<P>   For i = lstFicheros.ListCount - 1 To 0 Step -1</P>
+<P>      If lstFicheros.Selected(i) Then lstFicheros.RemoveItem (i)</P>
+<P>   Next</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbGuardar_Click()</P>
+<P>&nbsp;</P>
+<P>    On Error GoTo Errores</P>
+<P>    Dim i As Integer</P>
+<P>    'Para evitar valores remanentes en la lista, la borramos cada vez que que se</P>
+<P>    'guarda (Equivale a hacer un Clear en un ListBox antes de reasignar valores)</P>
+<P>    If GetSetting("EidosView", "Lista", 0) &lt;&gt; "" Then</P>
+<P>       DeleteSetting "EidosView", "Lista"</P>
+<P>    End If</P>
+<P>    For i = 0 To lstFicheros.ListCount - 1</P>
+<P>        SaveSetting "EidosView", "Lista", i, lstFicheros.List(i)</P>
+<P>    Next</P>
+<P>    Exit Sub</P>
+<P>    </P>
+<P>Errores:</P>
+<P>    MsgBox "Error al grabar", vbInformation, "Aviso"</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbA&ntilde;adir_Click()</P>
+<P>    </P>
+<P>    If filFicheros.filename = "" Then</P>
+<P>        MsgBox "No hay ning&uacute;n fichero seleccionado", vbExclamation, "Aviso"</P>
+<P>    Else</P>
+<P>        'A&ntilde;adir al Listbox de ficheros seleccionados</P>
+<P>         lstFicheros.AddItem filFicheros.Path &amp; "\" &amp; filFicheros.filename</P>
+<P>    End If</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub cmbAceptar_Click()</P>
+<P>    </P>
+<P>    Dim Segundos As Long</P>
+<P>    Select Case cbxIntervalos.Text</P>
+<P>          Case "3 Seg.", "" 'Por si el usuario ha borrado el valor manualmente</P>
+<P>               Segundos = 3</P>
+<P>          Case "1 Seg."</P>
+<P>               Segundos = 1</P>
+<P>          Case "10 Seg."</P>
+<P>               Segundos = 10</P>
+<P>          Case "30 Seg."</P>
+<P>               Segundos = 30</P>
+<P>          Case "60 Seg."</P>
+<P>               Segundos = 60</P>
+<P>    End Select</P>
+<P>    SaveSetting "EidosView", "Retardo", "Segundos", Segundos * 1000</P>
+<P>    cmbGuardar_Click</P>
+<P>    Unload Me</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub dirDirectorios_Change()</P>
+<P>      </P>
+<P>      filFicheros.Path = dirDirectorios.Path</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub drvUnidades_Change()</P>
+<P>&nbsp;</P>
+<P>   Dim CurDisp As String</P>
+<P>   On Error GoTo Errores</P>
+<P>   CurDisp = drvUnidades.Drive</P>
+<P>   dirDirectorios.Path = drvUnidades.Drive</P>
+<P>   Exit Sub</P>
+<P>   </P>
+<P>Errores:</P>
+<P>    MsgBox "El dispositivo no est&aacute; disponible", vbCritical, "Aviso"</P>
+<P>    drvUnidades.Drive = "C:"</P>
+<P>      </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub filFicheros_Click()</P>
+<P>      </P>
+<P>    On Error GoTo Errores</P>
+<P>    </P>
+<P>    sstSolapas.Tab = 0</P>
+<P>    picImagen.Picture = LoadPicture(filFicheros.Path &amp; "\" &amp; filFicheros.filename)</P>
+<P>    Exit Sub</P>
+<P>&nbsp;</P>
+<P>Errores:</P>
+<P>    MsgBox "No puede mostrarse la imagen", vbInformation, "Aviso"</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_Load()</P>
+<P>   </P>
+<P>   Dim i As Integer</P>
+<P>   cbxIntervalos.AddItem "1 Seg."</P>
+<P>   cbxIntervalos.AddItem "3 Seg."</P>
+<P>   cbxIntervalos.AddItem "10 Seg."</P>
+<P>   cbxIntervalos.AddItem "30 Seg."</P>
+<P>   cbxIntervalos.AddItem "60 Seg."</P>
+<P>   cbxIntervalos.Text = Int(Retardo / 1000) &amp; " Seg."</P>
+<P>   aImagen = GetAllSettings("EidosView", "Lista")</P>
+<P>   If IsEmpty(aImagen) Then Exit Sub</P>
+<P>   For i = 0 To UBound(aImagen)</P>
+<P>      lstFicheros.AddItem aImagen(i, 1)</P>
+<P>   Next</P>
+<P>   </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub sstSolapas_Click(PreviousTab As Integer)</P>
+<P>    </P>
+<P>    On Error GoTo Errores</P>
+<P>    </P>
+<P>    If sstSolapas.Tab = 2 Then</P>
+<P>       nCurImg = 0</P>
+<P>       MostrarImagen</P>
+<P>       txtFicActual = lstFicheros.List(nCurImg)</P>
+<P>    End If</P>
+<P>    Exit Sub</P>
+<P>Errores:</P>
+<P>    MsgBox "No puede mostrarse la imagen", vbInformation, "Aviso"</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Function MostrarImagen()</P>
+<P>&nbsp;</P>
+<P>    Dim ratio As Single, Ancho As Integer, Alto As Integer</P>
+<P>    Dim PPW As Single, PPH As Single</P>
+<P>    On Error GoTo Errores</P>
+<P>      </P>
+<P>    picAux.Picture = LoadPicture(lstFicheros.List(nCurImg))</P>
+<P>    picLista.Picture = LoadPicture()</P>
+<P>    If chkEscala.value = vbChecked Then</P>
+<P>       'Factor aproximado de correcci&oacute;n de HIMETRICS</P>
+<P>       PPW = picAux.Picture.Width * 0.578</P>
+<P>       PPH = picAux.Picture.Height * 0.578</P>
+<P>       If (PPW &gt; picLista.Width) Or (PPH &gt; picLista.Height) Then</P>
+<P>          'Tomamos como referencia la medida m&aacute;s grande</P>
+<P>          If (PPW - picLista.Width) &gt; (PPH - picLista.Height) Then</P>
+<P>             'Es mas ancho que alto</P>
+<P>             ratio = PPH / PPW</P>
+<P>             Ancho = picLista.Width</P>
+<P>             Alto = Ancho * ratio</P>
+<P>          Else</P>
+<P>             'Es m&aacute;s alto que ancho</P>
+<P>             ratio = PPW / PPH</P>
+<P>             Alto = picLista.Height</P>
+<P>             Ancho = Alto * ratio</P>
+<P>          End If</P>
+<P>       Else</P>
+<P>          Ancho = picLista.Width</P>
+<P>          Alto = picLista.Height</P>
+<P>       End If</P>
+<P>       picLista.PaintPicture picAux.Picture, 0, 0, Ancho, Alto</P>
+<P>    Else</P>
+<P>       picLista.PaintPicture picAux.Picture, 0, 0</P>
+<P>    End If</P>
+<P>    Exit Function</P>
+<P>&nbsp;</P>
+<P>Errores:</P>
+<P>   MsgBox "No puede mostrarse la imagen", vbExclamation, "Aviso"</P>
+<P>&nbsp;</P>
+<P>End Function</P>
+</FONT><FONT SIZE=2><P ALIGN="CENTER"><IMG SRC="Image3.gif" WIDTH=606 HEIGHT=456><BR>
+Figura 3: Pantalla de configuraci&oacute;n del Salvapantallas</P>
+<P ALIGN="CENTER">&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Courier" SIZE=1><P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">Con esto gestionamos el aspecto del salvapantallas que el usuario probablemente querr&aacute; personalizar. Tambi&eacute;n es posible ignorar las capacidades de ejecuci&oacute;n como salvapantallas, y utilizar este formulario de forma independiente, como visualizador/catalogador de gr&aacute;ficos.</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Finalmente, los listados correspondientes a los formularios  de ejecuci&oacute;n y previsualizaci&oacute;n, m&aacute;s cortos, y que constan de sendas ventanas cuyas propiedades BorderStyle se han establecido a 0, para evitar que en la ejecuci&oacute;n se puedan tener referencias a ventanas. Tambi&eacute;n debe observar el lector c&oacute;mo se inhabilita el rat&oacute;n en tiempo de ejecuci&oacute;n. </P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<I><P ALIGN="JUSTIFY">Nota para el proceso de depuraci&oacute;n:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">A la hora de depurar este c&oacute;digo, probablemente lo mejor sea ignorar las acciones correspondientes a la anulaci&oacute;n del rat&oacute;n, as&iacute; como el establecimiento de la ventana de ejecuci&oacute;n como ventana de m&aacute;s alto nivel (llamada a SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, FLAGS), ya que de alguna forma, &eacute;stas aplicaciones se comportan como fueran modales de sistema, y un fallo en la fase de depuraci&oacute;n puede dejarnos en una situaci&oacute;n dif&iacute;cil de controlar.</P>
+<P>&nbsp;</P>
+</I><P>&nbsp;</P>
+<B><P>FrmEjecucion.frm (Formulario de Ejecuci&oacute;n)</P>
+</B><P>&nbsp;</P>
+<I><P>Autor: Marino Posadas (Grupo Eidos)</P>
+</I><P>&nbsp;</P>
+</FONT><FONT FACE="Courier" SIZE=1><P>Option Explicit</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)</P>
+<P>    </P>
+<P>    'Salir en cuanto el usuario pulsa una tecla</P>
+<P>    Unload Me</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_Load()</P>
+<P>    </P>
+<P>    'Comprobar Aviso de falta de im&aacute;genes seleccionadas y establecer</P>
+<P>    'retardo de visualizaci&oacute;n</P>
+<P>    If nTotalImg = 0 Then</P>
+<P>        lblAviso.Visible = True</P>
+<P>        lblAviso.Top = (Screen.Height - lblAviso.Height) / 2</P>
+<P>        lblAviso.Left = (Screen.Width - lblAviso.Width) / 2</P>
+<P>    End If</P>
+<P>    frmEjecucion.Timer1.Interval = Retardo</P>
+<P>    </P>
+<P>    'Situa la ventana en primer plano</P>
+<P>    Call SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, flags)</P>
+<P>    </P>
+<P>    'La ventana cubre toda la pantalla</P>
+<P>    Move 0, 0, Screen.Width, Screen.Height</P>
+<P>    </P>
+<P>    'Averigua si el usuario ha establecido protecci&oacute;n por</P>
+<P>    'contrase&ntilde;a</P>
+<P>    HayPWD = Val(RegGetValue(HKEY_CURRENT_USER, "Control Panel\Desktop", "ScreenSaveUsePassword"))</P>
+<P>      </P>
+<P>    'Comprobamos la versi&oacute;n del sistema (NT gestiona las</P>
+<P>    'contrase&ntilde;as por si mismo.)</P>
+<P>    InfoSistema</P>
+<P>    </P>
+<P>    'Si est&aacute; habilitada la contrase&ntilde;a hay que deshabilitar las</P>
+<P>    'secuencias de escape: (CTL+ALT+DEL, ALT-TAB, etc.)</P>
+<P>    If HayPWD And SistemaOp &lt;&gt; WinNT Then</P>
+<P>        Call SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1&amp;, 0&amp;, 0&amp;)</P>
+<P>    End If</P>
+<P>&nbsp;</P>
+<P>    'Hacemos desaparecer el cursor</P>
+<P>    Do</P>
+<P>    Loop Until ShowCursor(False) &lt; -5</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)</P>
+<P>    </P>
+<P>    'Salir en cuanto el usuario pulsa una tecla</P>
+<P>    Unload Me</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)</P>
+<P>    </P>
+<P>    Static Retraso As Long</P>
+<P>    Ratonazo = Ratonazo + 1</P>
+<P>    </P>
+<P>    'Esta rutina es necesaria debido a ciertos efectos</P>
+<P>    'secundarios dif&iacute;ciles de detectar a priori. (Gracias</P>
+<P>    'a PierFrancesco Parente por sus atinados comentarios</P>
+<P>    'al respecto).</P>
+<P>    'El problema es doble:</P>
+<P>    '1) Por un lado es muy sencillo que se produzcan m&iacute;nimos</P>
+<P>    '   movimientos del cursor no deseados, por lo que s&oacute;lo</P>
+<P>    '   debemos considerar como movimiento real la acumula-</P>
+<P>    '   ci&oacute;n de varios de ellos (pongamos, 4).</P>
+<P>    '2) Si ya hay una instancia de la ventana principal en</P>
+<P>    '   ejecuci&oacute;n, cuando se invoca una segunda instancia,</P>
+<P>    '   -y consecuentemente se termina-,se produce un efecto</P>
+<P>    '   no deseado: el formulario pierde el foco y vuelve a</P>
+<P>    '   tomarlo inmediatamente despu&eacute;s, lo que supone, a su vez,</P>
+<P>    '   que se produzcan sendos eventos MouseMove, aunque el</P>
+<P>    '   rat&oacute;n no se haya movido.</P>
+<P>    </P>
+<P>    If Ratonazo = 4 Then</P>
+<P>         Unload Me</P>
+<P>    End If</P>
+<P>    </P>
+<P>    'Como los eventos de rat&oacute;n son acumulativos podr&iacute;an</P>
+<P>    'darse efectos secundarios, por lo que -si han pasado</P>
+<P>    'm&aacute;s de 7 segundos, reiniciliazamos el contador.</P>
+<P>    If Retraso = 0 Then</P>
+<P>        Retraso = Timer</P>
+<P>    ElseIf Timer - Retraso &gt; 7 Then</P>
+<P>        Retraso = 0</P>
+<P>        Ratonazo = 0</P>
+<P>    End If</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)</P>
+<P>    </P>
+<P>    'Si hay protecci&oacute;n de contrase&ntilde;a, hay que suministrarla</P>
+<P>    'antes de salir</P>
+<P>    </P>
+<P>    If HayPWD And SistemaOp &lt;&gt; WinNT Then</P>
+<P>        Dim PassChck As Boolean</P>
+<P>        'Rehabilitamos el cursor para que el usuario pueda</P>
+<P>        'introducir la contrase&ntilde;a</P>
+<P>        Do</P>
+<P>        Loop Until ShowCursor(True) &gt; 5</P>
+<P>        'Comprobamos si esta establecida la contrase&ntilde;a</P>
+<P>        PassChck = VerifyScreenSavePwd(Me.hWnd)</P>
+<P>        If PassChck = False Then</P>
+<P>            'Volvemos a quitar el cursor</P>
+<P>            Do</P>
+<P>            Loop Until ShowCursor(False) &lt; -5</P>
+<P>            Cancel = True</P>
+<P>        End If</P>
+<P>    End If</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_Unload(Cancel As Integer)</P>
+<P>&nbsp;</P>
+<P>    'Habilitamos el cursor</P>
+<P>    Do</P>
+<P>    Loop Until ShowCursor(True) &gt; 5</P>
+<P>    </P>
+<P>    'Habilitamos teclas de escape</P>
+<P>    If HayPWD And SistemaOp &lt;&gt; WinNT Then</P>
+<P>        Call SystemParametersInfo(SPI_SCREENSAVERRUNNING, 0&amp;, 0&amp;, 0&amp;)</P>
+<P>    End If</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Timer1_Timer()</P>
+<P>    </P>
+<P>    Dim PosX, PosY As Integer</P>
+<P>    On Error GoTo Errores</P>
+<P>    </P>
+<P>    'Se establece contador c&iacute;clico de im&aacute;genes</P>
+<P>    nCurImg = IIf(nCurImg = nTotalImg, 0, nCurImg + 1)</P>
+<P>   </P>
+<P>    'Centramos la imagen en pantalla</P>
+<P>    Image1.Picture = LoadPicture(aImagen(nCurImg, 1))</P>
+<P>    PosX = (Screen.Width - Image1.Width) / 2</P>
+<P>    PosY = (Screen.Height - Image1.Height) / 2</P>
+<P>    Image1.Move PosX, PosY, Image1.Width, Image1.Height</P>
+<P>&nbsp;</P>
+<P>    Exit Sub</P>
+<P>    </P>
+<P>Errores:</P>
+<P>&nbsp;</P>
+<P>    'Por si alguna imagen no puede mostrarse</P>
+<P>    Image1.Picture = LoadPicture()</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P>&nbsp;</P>
+<P ALIGN="JUSTIFY">En cuanto al c&oacute;digo final, que pertenece a la ejecuci&oacute;n en la ventana de previsualizaci&oacute;n, lo m&aacute;s interesante es la forma en que declaramos a nuestra ventana como ventana hija de la Caja de Propiedades de Pantalla, junto a la funci&oacute;n de subclasificaci&oacute;n. Por subclasificaci&oacute;n entendemos siempre la posibilidad de utilizar nuestras propias rutinas en lugar de las rutinas por defecto, lo que nos permite a&ntilde;adir funcionalidad al modo de trabajo est&aacute;ndar. </P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">En este caso, lo que se hace es capturar el procedimiento de ventana mediante la llamada a la funci&oacute;n SetWindowLong, de la siguiente forma:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<B><P ALIGN="JUSTIFY">hManejador = SetWindowLong(hWnd, GWL_WNDPROC, AddressOf Proc_Ventana)</P>
+</B><P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">Esta funci&oacute;n recibe un puntero a la funci&oacute;n de usuario <I>Proc_Ventana</I> que Windows utilizar&aacute; para realizar las notificaciones est&aacute;ndar de env&iacute;o de mensajes, en lugar de enviarlos directamente al procedimiento de ventana por defecto. En este caso, nosotros capturamos los mensajes WM_CLOSE para poder tener conocimiento de cu&aacute;ndo es necesario cerrar la ventana de ejecuci&oacute;n en el modo de previsualizaci&oacute;n, ya que Windows notifica esta circunstancia a la ventana madre, y no a la nuestra. </P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><B><FONT FACE="Courier" SIZE=2><P>Formulario: frmPrevisual.frm</P>
+</B><P>&nbsp;</P></B>
+<I><P>Autor: Marino Posadas (Grupo Eidos)</P>
+</I><P>&nbsp;</P>
+<P>Option Explicit</P>
+<P>Dim HaySeleccion As Boolean</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_Load()</P>
+<P>    </P>
+<P>    'Primero controlamos si hay im&aacute;genes seleccionadas y tiempo</P>
+<P>    'de retardo en visualizaci&oacute;n</P>
+<P>    If nTotalImg &lt;&gt; 0 Then HaySeleccion = True</P>
+<P>&nbsp;</P>
+<P>    frmPrevisual.Timer1.Interval = Retardo</P>
+<P>&nbsp;</P>
+<P>    'Asignamos la subclasificaci&oacute;n del control para capturar</P>
+<P>    'los mensajes de cierre que se le env&iacute;en.</P>
+<P>    Capturar Picture1.hWnd</P>
+<P>    </P>
+<P>    'Averiguamos el tama&ntilde;o de la &aacute;rea cliente de la ventana</P>
+<P>    'de visualizacion de la Caja de dialogo Propiedades de Pantalla</P>
+<P>    Call GetClientRect(hVentanaPreV, AreaCliente)</P>
+<P>    </P>
+<P>    'Redimensionamos el control para que sea igual que &eacute;sa &aacute;rea</P>
+<P>    Picture1.Move 0, 0, (AreaCliente.Right - AreaCliente.Left) * Pixels_X, (AreaCliente.Bottom - AreaCliente.Top) * Pixels_Y</P>
+<P>    </P>
+<P>    'Situamos el control justo en la ventana de PreVisualizaci&oacute;n</P>
+<P>    Call SetParent(Picture1.hWnd, hVentanaPreV)</P>
+<P>    </P>
+<P>    'Asignamos la bandera de HayPrevisual para que el c&oacute;digo del</P>
+<P>    'evento Timer pueda saber la situaci&oacute;n</P>
+<P>    HayPrevisual = True</P>
+<P>    </P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Form_Unload(Cancel As Integer)</P>
+<P>&nbsp;</P>
+<P>    'Se debe eliminar la subclasificaci&oacute;n al terminar</P>
+<P>    Liberar Me.hWnd</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>Private Sub Timer1_Timer()</P>
+<P>&nbsp;</P>
+<P>    On Error GoTo Errores</P>
+<P>&nbsp;</P>
+<P>    If IsWindow(hVentanaPreV) = 0 Or Not HayPrevisual Then</P>
+<P>        'Si la ventana de propiedades no existe o no ha recibido el mensaje</P>
+<P>        '(por un fallo del sistema o similar), o bien se ha recibido un</P>
+<P>        'mensaje WM_CLOSE (HayPrevisual = False), terminamos</P>
+<P>        Unload Me</P>
+<P>        End</P>
+<P>    Else</P>
+<P>        If HaySeleccion Then</P>
+<P>            Dim PosX As Integer, PosY As Integer</P>
+<P>            nCurImg = IIf(nCurImg = nTotalImg, 0, nCurImg + 1)</P>
+<P>            'Situamos la imagen en la zona de Pre-Visualizaci&oacute;n</P>
+<P>            Picture1.Picture = LoadPicture(aImagen(nCurImg, 1))</P>
+<P>        End If</P>
+<P>        </P>
+<P>        'Redimensionamos la salida para que se adapte al tama&ntilde;o de la</P>
+<P>        'ventana</P>
+<P>        Picture1.PaintPicture Picture1.Picture, 0, 0, _</P>
+<P>                          (AreaCliente.Right - AreaCliente.Left) * Pixels_X, _</P>
+<P>                          (AreaCliente.Bottom - AreaCliente.Top) * Pixels_Y</P>
+<P>    End If</P>
+<P>    Exit Sub</P>
+<P>    </P>
+<P>Errores:</P>
+<P>   </P>
+<P>   'Si hay problemas com la imagen, nos aseguramos de que se descargue</P>
+<P>    Picture1.Picture = LoadPicture()</P>
+<P>&nbsp;</P>
+<P>End Sub</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">En cuanto a la fase de compilaci&oacute;n y generaci&oacute;n del programa, solamente recordar algunas peculiaridades: en las propiedades de proyecto, deberemos de anteponer al nombre del ejecutable la palabra clave SCRNSAVE, en la forma: SCRNSAVE:Eidos, lo que indica al sistema la naturaleza del ejecutable. Tambi&eacute;n debemos recordar que la extensi&oacute;n debe ser SCR, y que la ubicaci&oacute;n est&aacute;ndar de los salvapantallas es el directorio de sistema (o sea, <I>Windows\System</I> (o similar, para <I>Windows 95</I>), o bien <I>WinNT/System32</I> (en <I>NT</I>). En cualquier caso, si se desea personalizar adecuadamente la instalaci&oacute;n no se deber&iacute;a asumir en ning&uacute;n momento que la ubicaci&oacute;n de dichos directorios sea la ubicaci&oacute;n por defecto, sino interrogar al API de Windows mediante la funci&oacute;n GetSystemDirectory.</P>
+</FONT><FONT FACE="Courier" SIZE=1><P ALIGN="JUSTIFY">&nbsp;</P>
+</FONT><FONT FACE="Arial" SIZE=2><P ALIGN="JUSTIFY">Bien, hasta aqu&iacute; este ejercicio circense que supone construir una aplicaci&oacute;n que funciona a veces como modal de sistema y que para m&aacute;s entretenimiento, anula algunas teclas est&aacute;ndar y el rat&oacute;n entre otras caracter&iacute;sticas a&ntilde;adidas. Por lo dem&aacute;s, la utilizaci&oacute;n del API en diferentes circunstancias esperamos que resulte ilustrativa de las nuevas capacidades de Visual Basic para acercarse a las rutinas de bajo nivel. En sucesivos art&iacute;culos iremos revisando las tremendas posibilidades que esto ofrece en otras &aacute;reas de la programaci&oacute;n.</P>
+</FONT><FONT FACE="Arial" SIZE=2><P>&nbsp;</P>
+<P>&nbsp;</P>
+<B><P>Bibliograf&iacute;a y Agradecimientos</P>
+<P>&nbsp;</P>
+</B><P ALIGN="JUSTIFY">Mi reconocimiento a <B>Pier Francesco Parente</B>, por sus acertados comentarios en el &aacute;rea de Microsoft de programaci&oacute;n de API’s  con Visual Basic, as&iacute; como a ese excelente conocedor del API de Windows que es <B>Joe LeVasseur</B>, tambi&eacute;n presente con frecuencia en el foro antes citado. En cuanto a las obras de referencia, simplemente, LA OBRA:</P>
+<P ALIGN="JUSTIFY">&nbsp;</P>
+<P ALIGN="JUSTIFY">&quot;Visual Basic Programmer’s Guide to the Win32 API&quot;, Daniel Appleman, ZD Press.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<B><P>&nbsp;</P></B></FONT></BODY>
+</HTML>

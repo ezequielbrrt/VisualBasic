@@ -1,0 +1,77 @@
+Control osProgress.OCX
+======================
+
+
+Control realizado en VB5, por lo que es válido únicamente para plataformas de 32 bits.
+
+
+Descripción.-
+=============
+
+El control osProgress.OCX es una barra de progreso, que cuenta con las siguientes propiedades:
+
+- Appearance3D: Indica la apariencia 3D o no del control.
+
+- BorderColor: Posibilidad de ponerle al borde del control un color a elegir.
+
+- BorderWidth: Ancho del borde en twips. Por cuestiones de estética y problemas en el funcionamiento, se ha limitado este valor a 300, valor más que suficiente para diferenciar el borde respecto del interior. Es posible que el valor devuelto por la propiedad no se corresponde exactamente con el introducido. El margen de error es de 4 twips (cantidad insignificante), y es debido al entorno y no a defectos de programación.
+
+- DelayTime: Tiempo en segundos que tardará en restablecerse a 0 el valor del contador una vez ha llegado al final del proceso. Si no se quiere borrar el valor de la barra, poner la propiedad DelayTime a 0.
+
+- Horizontal: Establece o indica si la orientación del control es horizontal.
+
+- Max: Establece el valor máximo de la barra de progreso.
+
+- Min: Establece el valor mínimo de la barra de progreso. Debe ser un valor positivo.
+
+- PercentValue: Establece directamente el porcentaje, y modifica la propiedad Value al valor correspondiente al porcentaje introducido. Si se cambia la propiedad Max o Min, PercentValue se adapta al valor de la propiedad Value.
+
+- PercVisible: Establece si el indicador de porcentaje está visible.
+
+- ProgressColor: Color que tendrán tanto la barra de progreso como el indicador de porcentaje.
+
+- Sound: Indica si al finalizar el proceso se produce un sonido. Por defecto está a True.
+
+- Value: Valor de tipo long que debe estar entre Min y Max. El control se encarga de calcular el porcentaje correspondiente.
+
+Cuando el proceso llega a su término (es decir, el porcentaje es igual al 100%, o Value=Max), se produce el evento "Finished".
+
+AVISO: Para operar correctamente en tiempo de ejecución, primero hay que establecer la propiedad Min, luego Value y, finalmente, la propiedad Max. De no hacerse así, se pueden producir resultados indeseados mientras se establecen los demás valores, ya que puede darse la circunstancia de que, por ejemplo, la propiedad Value sea mayor que Max o menor que Min, lo cual genera un error en tiempo de ejecución. 
+
+
+
+Instalación.-
+=============
+
+Copiar el fichero osProgress.ocx en el directorio System de Windows. A continuación, registrar el control en el sistema, para lo cual es recomendable asociar la extensión OCX con el programa Regsrv32. Esto se hace haciendo doble click sobre cualquier fichero con extensión OCX, y cuando se nos pregunte con qué programa deseamos abrir el fichero, si no aparece el Regsrv32 entre las posibles opciones, escoger la opción de "Otros..." e indicarle el fichero Regsrv32.exe que se encuentra en el directorio system. Hay que tener en cuenta que tiene que estar activada la opción de "Utilizar siempre este programa para abrir este archivo".
+Si no se desea asociar la extensión OCX, para registrar el control, ejecutar
+
+Regsrv32 /v osprogress.ocx
+
+o bien arrastrar el fichero osprogress.ocx sobre el regsrv32.exe y soltar (dependiendo de los ficheros que haya en el directorio, es posible que aparezcan ambos en la misma pantalla del explorador). 
+
+Se incluye un proyecto en VB5 para ver las capacidades del control (Progress.vbp).
+
+
+Nota para distribución.-
+========================
+
+El control está compuesto por un PictureBox, un Shape, un Label y un Timer. Esto quiere decir que para su distribución no se necesita ninguna librería adicional de las meramente imprescindibles para instalar una aplicación en una máquina.
+
+
+
+Bugs encontrados.-
+==================
+
+Se ha encontrado que, modificando el tamaño del control, en determinadas ocasiones, se producen resultados indeseados. Este error ya ha sido subsanado.
+
+
+
+Sugerencias.-
+=============
+
+Lo único que tengo pensado pendiente de añadir es una página de propiedades, pero de momento, con las explicaciones expuestas y el formulario de ejemplo, es suficiente para aprovechar su rendimiento.
+
+Cualquier aportación o sugerencia será bienvenida.
+
+Realizado por Oscar Manuel Gómez Senovilla (oscarsen@eims.es) en noviembre de 1997.

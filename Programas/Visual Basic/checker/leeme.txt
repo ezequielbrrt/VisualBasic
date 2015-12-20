@@ -1,0 +1,22 @@
+Saludos a todos los listeros. Pongo a su disposición un proyecto de VB5
+con todo su codigo fuente, que sirve para chequear si hay mensajes
+nuevos de e-mail a través de POP3. El unico control OCX que utiliza es
+el winsock. 
+Bugs conocidos: si el password POP3 es inválido, aparece un mensaje de
+error (que pertenece al control winsock):protocolo o estado de conexión
+erroneo para la transaccion o peticion solicitada. La solución es
+corregir el password. 
+Lamentablemente, no dispongo de tiempo para dar soporte específico
+sobre  como modificar características, pero les agradeceré a todos si me
+informan de los errores que vayan encontrando. 
+
+Saludos patagónicos
+-- 
+         Julio Daniel Moreyra
+         Analista de Sistemas
+   Sup. Tribunal de Justicia - Chubut
+
+e-mail: jmoreyra@juschub.satlink.net
+Rivadavia y Jones s/n - Rawson (9103) - Chubut - Argentina
+Te: 54-0965-82331
+Fax: 54-0965-82335

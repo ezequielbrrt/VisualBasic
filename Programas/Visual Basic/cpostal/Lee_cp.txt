@@ -1,0 +1,18 @@
+dirdat.zip tiene los siguientes ficheros:
+	18pob.dat		poblaciones de Granada
+	29pob.dat		poblaciones de Málaga
+	18dir.dat		callejero de Granada
+	29dir.dat		callejero de Málaga
+	prov.dat		Provincias en el directorio
+
+La ubicación de estos ficheros debe ser en el directorio:
+C:\CP
+El directorio del programa o el directorio especificado para
+iniciar la aplicación.
+
+El formato usado por prov.dat, será:
+PROVINCIA  ,CÓDIGO		nombre_provincia coma código_provincia
+
+Ejemplo para Granada y Málaga:
+GRANADA    ,18
+MALAGA     ,29

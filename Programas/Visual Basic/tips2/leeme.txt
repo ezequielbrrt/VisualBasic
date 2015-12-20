@@ -1,0 +1,4 @@
+En el archivo VB4.txt teneis el ejemplo enviado por 
+Oscar Manuel <oscarsen@cros.es>
+
+En el proyecto de visual teneis mi adaptación a VB 3.0

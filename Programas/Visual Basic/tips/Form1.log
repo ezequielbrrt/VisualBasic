@@ -1,0 +1,25 @@
+Línea 34: la clase SSPanel del control Panel3D8 no era una clase de control cargada.
+Línea 41: la clase SSCommand del control btnImprimir no era una clase de control cargada.
+Línea 53: la clase SSCommand del control btnGrabar no era una clase de control cargada.
+Línea 65: la clase SSCommand del control btnSalir no era una clase de control cargada.
+Línea 77: la clase SSCommand del control btnPrimero no era una clase de control cargada.
+Línea 89: la clase SSCommand del control btnAnterior no era una clase de control cargada.
+Línea 101: la clase SSCommand del control btnSiguiente no era una clase de control cargada.
+Línea 113: la clase SSCommand del control btnUltimo no era una clase de control cargada.
+Línea 125: la clase SSCommand del control btnBorrar no era una clase de control cargada.
+Línea 43: el nombre de la propiedad BevelWidth de btnImprimir no es válido.
+Línea 46: el nombre de la propiedad Outline de btnImprimir no es válido.
+Línea 55: el nombre de la propiedad BevelWidth de btnGrabar no es válido.
+Línea 58: el nombre de la propiedad Outline de btnGrabar no es válido.
+Línea 67: el nombre de la propiedad BevelWidth de btnSalir no es válido.
+Línea 70: el nombre de la propiedad Outline de btnSalir no es válido.
+Línea 79: el nombre de la propiedad BevelWidth de btnPrimero no es válido.
+Línea 82: el nombre de la propiedad Outline de btnPrimero no es válido.
+Línea 91: el nombre de la propiedad BevelWidth de btnAnterior no es válido.
+Línea 94: el nombre de la propiedad Outline de btnAnterior no es válido.
+Línea 103: el nombre de la propiedad BevelWidth de btnSiguiente no es válido.
+Línea 106: el nombre de la propiedad Outline de btnSiguiente no es válido.
+Línea 115: el nombre de la propiedad BevelWidth de btnUltimo no es válido.
+Línea 118: el nombre de la propiedad Outline de btnUltimo no es válido.
+Línea 127: el nombre de la propiedad BevelWidth de btnBorrar no es válido.
+Línea 130: el nombre de la propiedad Outline de btnBorrar no es válido.
